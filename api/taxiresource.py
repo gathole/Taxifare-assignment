@@ -36,8 +36,8 @@ class FareResource(Resource):
         allowed_methods = ['get']
         resource_name = 'fare'
         object_class = DictObject       
-        authorization= ReadOnlyAuthorization()
-        authentication= BasicAuthentication()
+        # authorization= ReadOnlyAuthorization()
+        # authentication= BasicAuthentication()
 
     def get_city(self, name):
         KEY = CITY_KEY.format(name)
@@ -181,44 +181,4 @@ class FareResource(Resource):
         return bundle         
 
 
-# city - yes
-# date - 
-# is_night - 
-# from_location - yes
-# to_location - yes
-# trip_type - yes
-# car_type - yes
-# city=delhi&date=2014-01-23&is_night=True&from_location=malviya nager&to_location=saket&trip_type=PointToPoint&car_type=Hatchback
-
-# Cache
-# Docs
-# Authentication - Done
-# login with email - Done
-# Home page - Done
-
-        #######################################################        
-
-        # car_type = request.REQUEST.get('car_type', None)
         
-        # if trip_obj and trip_obj.type.lower() == "outstation":
-        #   cars = Car.objects.filter(model=car_type)
-
-        #   if len(cars) == 0:
-        #       cars = Car.objects.all()
-        #   for c in cars:
-        #       obj = DictObject()
-        #       obj.base_fare       = city.base_fare+(city.base_fare*c.fare_pe/100)
-        #       obj.base_km         = city.base_km+(city.base_km*c.fare_pe/100)
-        #       obj.extra_km_fare   = city.extra_km_fare+(city.extra_km_fare*c.fare_pe/100)
-        #       obj.car_type        = c.model
-        #       object_list.append(obj)
-
-        # city_trip = CityTrip.objects.get(city__name=city_name, trip_type__type=trip_type)
-        # if city_trip and city_trip.flat_fare > 0.0:
-        #   obj = DictObject()
-        #   obj.flat_fare = city_trip.flat_fare
-        #   object_list.append(obj)
-
-
-#curl http://localhost:8000/api/v1/books/?username=issackelly\&api_key=123456789adfljafal
-
