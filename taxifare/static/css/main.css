@@ -1,0 +1,39 @@
+.body{
+	background-color: #ACACAC;
+	margin: 0px;
+    padding: 0px;
+}
+
+.header{
+	background-color: #111111;
+    color: #FFFFFF;
+    line-height: 1;
+    padding: 10px 30px;
+}
+
+.title > a{
+	color: #FFFFFF;
+    font-family: sans-serif;
+    font-size: 35px;    
+    text-decoration: none;
+}
+
+.content{
+    line-height: 1.8;
+    padding: 10px 30px;
+}
+
+.buttons{
+	text-align: center;
+	padding: 30px;
+}
+
+.buttons > a{
+	background: none repeat scroll 0 0 #2A2A2A;
+	color: #ACACAC;
+    border: 2px none;
+    border-radius: 30px;
+    margin: 10px;
+    padding: 12px 20px;
+    text-decoration: none;
+}

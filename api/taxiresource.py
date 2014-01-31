@@ -36,8 +36,8 @@ class FareResource(Resource):
         allowed_methods = ['get']
         resource_name = 'fare'
         object_class = DictObject       
-        # authorization= ReadOnlyAuthorization()
-        # authentication= BasicAuthentication()
+        authorization= ReadOnlyAuthorization()
+        authentication= BasicAuthentication()
 
     def get_city(self, name):
         KEY = CITY_KEY.format(name)
