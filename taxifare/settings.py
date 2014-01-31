@@ -167,6 +167,22 @@ LOGGING = {
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
+# In Hours 8pm
+START_NIGHT = 20 
+
+# In Hours 4am
+END_NIGHT = 4 
+
+# Time is miliseconds. Timeout 5min
+CACHE_TIMEOUT = 300
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+
 try:
     from local_settings import *
 except ImportError:

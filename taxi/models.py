@@ -1,6 +1,9 @@
 from django.db import models
-from tastypie.models import create_api_key
 from django.contrib.auth.models import User
+from django.core.cache import cache
+
+from tastypie.models import create_api_key
+from taxi.cache_key import *
 
 class City(models.Model):
 	name 			= models.CharField("Name", max_length=255, unique=True)
@@ -50,3 +53,27 @@ class Car(models.Model):
 
 	def __unicode__(self):
 		return self.model
+
+
+####################### Clear Cache on Objects Update ###########################
+
+def car_cache_clear(sender, instance, *args, **kwargs):
+	cache.delete(CAR_KEY.format(instance.model))
+	cache.delete(ALL_CAR)
+
+
+def city_cache_clear(sender, instance, *args, **kwargs):
+	cache.delete(CITY_KEY.format(instance.name))
+
+
+def trip_type_cache_clear(sender, instance, *args, **kwargs):
+	cache.delete(TRIP_KEY.format(instance.type))
+
+
+def city_trip_cache_clear(sender, instance, *args, **kwargs):
+	cache.delete(CITY_TRIP_KEY.format(instance.city, instance.trip_type))
+
+models.signals.pre_save.connect(car_cache_clear, sender=Car)  
+models.signals.pre_save.connect(city_cache_clear, sender=City)  
+models.signals.pre_save.connect(trip_type_cache_clear, sender=TripType)  
+models.signals.pre_save.connect(city_trip_cache_clear, sender=CityTrip) 

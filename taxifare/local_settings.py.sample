@@ -10,10 +10,3 @@ DATABASES = {
     }
 }
 
-
-# In Hours 8pm
-START_NIGHT = 20 
-
-# In Hours 4am
-END_NIGHT = 4 
-

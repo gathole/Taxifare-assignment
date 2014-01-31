@@ -1,5 +1,6 @@
 from django.conf import settings
 from datetime import datetime
+from django.core.cache import cache
 
 from tastypie.resources import ModelResource
 from tastypie.resources import Resource
@@ -8,7 +9,9 @@ from tastypie.authentication import BasicAuthentication
 from tastypie.authorization import ReadOnlyAuthorization
 
 from taxi.models import *
+from taxi.cache_key import *
 from api.dict_obj import DictObject
+
 
 class CityResource(ModelResource):
     class Meta:
@@ -17,6 +20,8 @@ class CityResource(ModelResource):
         excludes = ['id']
         allowed_methods = ['get']
         resource_name = 'city'
+        authorization= ReadOnlyAuthorization()
+        authentication= BasicAuthentication()
           
 class FareResource(Resource):
     base_fare		= fields.FloatField(attribute="base_fare", null=True)
@@ -34,25 +39,37 @@ class FareResource(Resource):
         authorization= ReadOnlyAuthorization()
         authentication= BasicAuthentication()
 
-    def get_city(self, name):        
-        try:
-            city = City.objects.get(name=name)
-        except City.DoesNotExist:
-            city = None        
+    def get_city(self, name):
+        KEY = CITY_KEY.format(name)
+        city = cache.get(KEY, None)
+        if city is None:
+            try:
+                city = City.objects.get(name=name)
+                cache.set(KEY, city, settings.CACHE_TIMEOUT)
+            except City.DoesNotExist:
+                city = None        
         return city
 
-    def get_trip(self, type):        
-        try:
-            trip = TripType.objects.get(type=type)
-        except TripType.DoesNotExist:
-            trip = None
+    def get_trip(self, type): 
+        KEY = TRIP_KEY.format(type)
+        trip = cache.get(KEY, None)   
+        if trip is None:    
+            try:
+                trip = TripType.objects.get(type=type)                
+                cache.set(KEY, trip, settings.CACHE_TIMEOUT)
+            except TripType.DoesNotExist:
+                trip = None
         return trip
 
     def get_car(self, model):
-        try:
-            car = Car.objects.get(model=model)
-        except Car.DoesNotExist:
-            car = None
+        KEY = CAR_KEY.format(model)
+        car = cache.get(KEY, None)   
+        if car is None:   
+            try:
+                car = Car.objects.get(model=model)          
+                cache.set(KEY, car, settings.CACHE_TIMEOUT)
+            except Car.DoesNotExist:
+                car = None
         return car
 
     def extra_charge(self, time, outside, fare_variation):
@@ -120,14 +137,21 @@ class FareResource(Resource):
                 obj = self.get_fare_details(fare, total_extra_charges/100.0, dicount/100.0)
                 object_list.append(obj)
 
-                if not is_outside_trip:                    
-                    city_trip = CityTrip.objects.filter(city=city, trip_type=trip_obj)
+                if not is_outside_trip:
+                    KEY = CITY_TRIP_KEY.format(city.id, trip_obj.id)
+                    city_trip = cache.get(KEY, None)
+                    if city_trip is None:
+                        city_trip = CityTrip.objects.filter(city=city, trip_type=trip_obj) 
+                        cache.set(KEY, city_trip, settings.CACHE_TIMEOUT)
                     for ct in city_trip:
                         obj = DictObject()
-                        obj.flat_fare = ct.flat_fare + ct.flat_fare*extra_charges/100.0 - ct.flat_fare*dicount/100.0
+                        obj.flat_fare = ct.flat_fare + ct.flat_fare*total_extra_charges/100.0 - ct.flat_fare*dicount/100.0
                         object_list.append(obj)
             else:
-                cars = Car.objects.all()
+                cars = cache.get(ALL_CAR, None)
+                if cars is None:
+                    cars = Car.objects.all()
+                    cache.set(ALL_CAR, cars, settings.CACHE_TIMEOUT)
                 for car in cars:
                     total_extra_charges = extra_charges + car.fare_percent
                     obj = self.get_fare_details(fare, total_extra_charges/100.0, dicount/100.0)
@@ -194,3 +218,7 @@ class FareResource(Resource):
         #   obj = DictObject()
         #   obj.flat_fare = city_trip.flat_fare
         #   object_list.append(obj)
+
+
+#curl http://localhost:8000/api/v1/books/?username=issackelly\&api_key=123456789adfljafal
+
